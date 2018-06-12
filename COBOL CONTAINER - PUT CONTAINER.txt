@@ -1,0 +1,44 @@
+// Cobol Container: Put container 
+
+*----------------------------------------------------------------*
+*--- COBOL CONTAINER: MOVE VARIABLES           
+*----------------------------------------------------------------*
+
+*--- ---> Build Container Name
+     MOVE 'CONTAINER NAME'          TO GD-CONTAINER-NAME.
+
+*--- ---> Build Channel Name
+     STRING 'CNL-' GD-CONTAINER-NAME         
+        DELIMITED BY SIZE INTO GD-CONTAINER-NAME 
+     END-STRING.                            
+
+*--- ---> Move Put Data / Size	 
+     MOVE LENGTH OF WS-DATA         TO GD-CONTAINER-PUT-SIZE.
+     MOVE WS-DATA                   TO GD-CONTAINER-PUT-DATA.
+	 
+*----------------------------------------------------------------*
+*--- COBOL CONTAINER: PUT CONTAINER           
+*----------------------------------------------------------------*
+                                                                  
+*--- Put Container                                 
+     EXEC CICS PUT                                                
+          CONTAINER (  GD-CONTAINER-NAME       )           
+          CHANNEL   (  GD-CONTAINER-CHANELL    )           
+          FROM      (  GD-CONTAINER-PUT-DATA   )           
+          FLENGTH   (  GD-CONTAINER-PUT-SIZE   )           
+          RESP      (  GD-CONTAINER-RESP       )           
+          RESP2     (  GD-CONTAINER-RESP2      )           
+     END-EXEC.                                                    
+                                                                  
+*--- Trata retorno                                                
+     EVALUATE TRUE                                                
+        WHEN GD-CONTAINER-RESP EQUAL ZEROS                       
+             CONTINUE                                             
+        WHEN OTHER                                                
+             MOVE 1 TO GD-ERROR-CODE                            
+             STRING 'Error put container ' GD-CONTAINER-NAME ', '          
+                    'RESP=' GD-CONTAINER-RESP ', RESP-2=' GD-CONTAINER-RESP2          
+                    DELIMITED BY SIZE                             
+                    INTO GD-ERROR-TXT                         
+             END-STRING                                           
+     END-EVALUATE.                                                 
