@@ -1,0 +1,72 @@
+// Cobol Cursor: Open / Fetch / Close
+
+*----------------------------------------------------------------*
+ 100011-OPEN-CURSOR                                       SECTION.
+*----------------------------------------------------------------*
+                                                                  
+     EXEC SQL                                                     
+        OPEN CURSOR                                               
+     END-EXEC.                                                     
+                                                                  
+     IF SQLCODE NOT EQUAL ZEROS                                   
+        PERFORM 999010-ERRO-010                                   
+     END-IF                                                       
+     .                                                            
+                                                                  
+ 100011-FIM.                                                      
+     EXIT.                                                        
+                                                                  
+*----------------------------------------------------------------*
+ 100012-FETCH-CURSOR                                      SECTION.
+*----------------------------------------------------------------*
+*--- N-NULL-GD-B (IS NULL IF EQUAL -1) 
+*----------------------------------------------------------------*
+                                                                  
+     EXEC SQL                                                     
+        FETCH CURSOR                                              
+        INTO :GD-A                                       
+           , :GD-B :N-NULL-GD-B                                            
+     END-EXEC.                                                     
+                                                                  
+     IF SQLCODE NOT EQUAL (ZEROS AND 100)                         
+        PERFORM 999020-ERRO-020                                   
+     END-IF.                                                       
+                                                                  
+*--- Move Cursor End:                                          
+*---    1. SQLCODE equal 100;                                   
+*---    2. Crash list.                              
+     IF SQLCODE EQUAL 100                                         
+        MOVE 'S' TO GD-CURSOR-END                                 
+     ELSE                                                         
+        IF QT-CONTAINER GREATER 50                                      
+           PERFORM 999030-ERRO-030                                
+        ELSE                                                      
+*--- Move Data                                 
+           MOVE GD-A         TO WS-A
+           IF N-NULL-GD-B EQUAL -1		   
+              MOVE ZEROS     TO WS-B
+           ELSE
+              MOVE GD-B      TO WS-B
+           END-IF 			  
+        END-IF                                                    
+     END-IF                                                       
+     .                                                            
+                                                                  
+ 100012-FIM.                                                      
+     EXIT.                                                        
+                                                                  
+*----------------------------------------------------------------*
+ 100013-CLOSE-CURSOR                                      SECTION.
+*----------------------------------------------------------------*
+                                                                  
+     EXEC SQL                                                     
+        CLOSE CURSOR                                              
+     END-EXEC.                                                     
+                                                                  
+     IF SQLCODE NOT EQUAL ZEROS                                   
+        PERFORM 999040-ERRO-040                                   
+     END-IF                                                       
+     .                                                            
+                                                                  
+ 100013-FIM.                                                      
+     EXIT.                                                        
