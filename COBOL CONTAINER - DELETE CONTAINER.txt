@@ -1,0 +1,31 @@
+// Cobol Container: Delete container 
+
+*----------------------------------------------------------------*
+*--- COBOL CONTAINER: MOVE VARIABLES           
+*----------------------------------------------------------------*
+
+*--- ---> Build Container Name
+     MOVE 'CONTAINER NAME'          TO GD-CONTAINER-NAME.
+
+*--- ---> Build Channel Name                  
+     STRING 'CNL-' GD-CONTAINER-NAME             
+        DELIMITED BY SIZE INTO GD-CONTAINER-CHANELL 
+     END-STRING.                            
+	 
+*----------------------------------------------------------------*
+*--- COBOL CONTAINER: DELETE CONTAINER           
+*----------------------------------------------------------------*
+                                                                  
+*--- Delete container GD-CONTAINER-NAME                 
+     EXEC CICS DELETE                                  
+          CONTAINER ( GD-CONTAINER-NAME    ) 
+          CHANNEL   ( GD-CONTAINER-CHANELL ) 
+          NOHANDLE                                     
+     END-EXEC.                                         
+                                                       
+*--- Return                                     
+     IF NOT (EIBRESP EQUAL DFHRESP(NORMAL) OR          
+        EIBRESP EQUAL DFHRESP(CONTAINERERR)   )        
+        MOVE 01                  TO GD-CONTAINER-CD-ERRO   
+        MOVE 'Erro Text'         TO GD-CONTAINER-TX-ERRO
+     END-IF.                                           
